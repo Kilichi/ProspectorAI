@@ -1,0 +1,213 @@
+{
+  "id": "ProspectorAISearch01",
+  "versionId": "d9f134e0-e8ba-441f-8954-dbcaa52d46fa",
+  "name": "ProspectorAI — Buscar empresas una a una",
+  "active": false,
+  "nodes": [
+    {
+      "id": "webhook",
+      "webhookId": "1e785a64-7e45-4db2-83a0-f770dd76e2c2",
+      "name": "Buscar empresas",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "buscar-empresas",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "options": {
+          "responseCode": {
+            "values": {
+              "responseCode": "customCode",
+              "customCode": 202
+            }
+          }
+        }
+      },
+      "position": [0, 0],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "seleccionar-credencial-local",
+          "name": "ProspectorAI local"
+        }
+      }
+    },
+    {
+      "id": "prepare",
+      "name": "Preparar candidatas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:3001/api/orchestration/prepare",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "position": [240, 0],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "seleccionar-credencial-local",
+          "name": "ProspectorAI local"
+        }
+      }
+    },
+    {
+      "id": "split",
+      "name": "Separar empresas",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "parameters": {
+        "fieldToSplitOut": "empresas",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "position": [480, 0]
+    },
+    {
+      "id": "loop",
+      "name": "Una empresa cada vez",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "position": [720, 0]
+    },
+    {
+      "id": "analyze",
+      "name": "Analizar empresa",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "=http://backend:3001/api/orchestration/searches/{{ $json.searchId }}/companies/{{ $json.empresas.id }}/analyze",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "position": [960, 100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "seleccionar-credencial-local",
+          "name": "ProspectorAI local"
+        }
+      }
+    },
+    {
+      "id": "wait",
+      "name": "Respetar pausa",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": "={{ $json.aiDelayMs / 1000 }}",
+        "unit": "seconds"
+      },
+      "position": [1200, 100]
+    },
+    {
+      "id": "done",
+      "name": "Lote terminado",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "parameters": {},
+      "position": [960, -140]
+    }
+  ],
+  "connections": {
+    "Buscar empresas": {
+      "main": [
+        [
+          {
+            "node": "Preparar candidatas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar candidatas": {
+      "main": [
+        [
+          {
+            "node": "Separar empresas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separar empresas": {
+      "main": [
+        [
+          {
+            "node": "Una empresa cada vez",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Una empresa cada vez": {
+      "main": [
+        [
+          {
+            "node": "Lote terminado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Analizar empresa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analizar empresa": {
+      "main": [
+        [
+          {
+            "node": "Respetar pausa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respetar pausa": {
+      "main": [
+        [
+          {
+            "node": "Una empresa cada vez",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "executionTimeout": 1800,
+    "saveDataErrorExecution": "none",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false
+  },
+  "pinData": {},
+  "tags": []
+}

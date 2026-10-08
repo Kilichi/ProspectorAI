@@ -1,0 +1,23 @@
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import { env } from './config/env.js';
+import { healthRoutes } from './routes/healthRoutes.js';
+import { searchRoutes } from './routes/searchRoutes.js';
+import { companyRoutes } from './routes/companyRoutes.js';
+import { statsRoutes } from './routes/statsRoutes.js';
+import { orchestrationRoutes } from './routes/orchestrationRoutes.js';
+import { errorHandler, notFound } from './middlewares/errorHandler.js';
+
+export const app = express();
+app.disable('x-powered-by');
+app.use(helmet());
+app.use(cors({ origin: env.FRONTEND_ORIGIN }));
+app.use(express.json({ limit: '32kb' }));
+app.use('/api/health', healthRoutes);
+app.use('/api/searches', searchRoutes);
+app.use('/api/companies', companyRoutes);
+app.use('/api/stats', statsRoutes);
+app.use('/api/orchestration', orchestrationRoutes);
+app.use(notFound);
+app.use(errorHandler);

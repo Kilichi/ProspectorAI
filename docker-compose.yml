@@ -1,0 +1,87 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    init: true
+    env_file: backend/.env
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3001
+      MONGODB_URI: mongodb://mongodb:27017/prospectorai
+      N8N_WEBHOOK_URL: http://n8n:5678/webhook/buscar-empresas
+    ports:
+      - '127.0.0.1:3001:3001'
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3001/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:5173:80'
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:2.42.5
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:5678:5678'
+    environment:
+      TZ: Europe/Madrid
+      GENERIC_TIMEZONE: Europe/Madrid
+      N8N_HOST: localhost
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      N8N_WEBHOOK_URL: http://localhost:5678/
+      # Publicación por CLI: registrar los workflows publicados al arrancar.
+      # El consumidor outbox nuevo no recibe eventos de publish:workflow.
+      N8N_USE_WORKFLOW_PUBLICATION_SERVICE: 'false'
+      N8N_EDITOR_BASE_URL: http://localhost:5678/
+      N8N_SECURE_COOKIE: 'false'
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: 'true'
+      N8N_DIAGNOSTICS_ENABLED: 'false'
+      N8N_VERSION_NOTIFICATIONS_ENABLED: 'false'
+      N8N_PERSONALIZATION_ENABLED: 'false'
+      EXECUTIONS_DATA_PRUNE: 'true'
+      EXECUTIONS_DATA_MAX_AGE: 168
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n/workflows:/workflows:ro
+
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:27017:27017'
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test:
+        ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongodb_data:
+  n8n_data:

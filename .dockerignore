@@ -1,0 +1,13 @@
+**/node_modules
+**/.env
+**/.env.*
+**/dist
+**/coverage
+.git
+.agents
+.codex
+.npm-cache
+test-results
+playwright-report
+**/*.log
+docs

@@ -1,0 +1,42 @@
+{
+  "name": "prospectorai",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "overrides": {
+    "shell-quote": "^1.12.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@playwright/test": "^1.64.0",
+    "concurrently": "^9.2.0",
+    "eslint": "^9.39.0",
+    "eslint-plugin-react-hooks": "^7.0.0",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "prettier": "^3.6.2",
+    "supertest": "^7.1.4",
+    "vitest": "^4.0.0"
+  },
+  "scripts": {
+    "n8n:repair": "node scripts/n8n-repair.js",
+    "docker:prepare": "node scripts/docker.js prepare",
+    "docker:up": "node scripts/docker.js up",
+    "docker:down": "node scripts/docker.js down",
+    "docker:check": "node scripts/docker.js check",
+    "clean": "node scripts/clean.js",
+    "dev": "concurrently --kill-others -n backend,frontend \"npm run dev -w backend\" \"npm run dev -w frontend\"",
+    "test": "npm test -w backend",
+    "test:ui": "playwright test",
+    "build": "npm run build -w frontend",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  }
+}

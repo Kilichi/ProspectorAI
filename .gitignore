@@ -1,0 +1,15 @@
+node_modules/
+.npm-cache/
+.env
+.env.*
+!.env.example
+dist/
+coverage/
+test-results/
+playwright-report/
+*.log
+.DS_Store
+.idea/
+.vscode/
+# Enunciado local; no forma parte de la aplicación distribuida.
+EXTRA Act - OPCIONAL - ProspectorAI.pdf
