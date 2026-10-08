@@ -6,6 +6,24 @@ Proyecto docente de DWES para encontrar empresas candidatas a Formación en Empr
 
 La aplicación nunca envía correos. OSM ofrece candidatas, no un censo completo. La IA recibe datos OSM y texto de la página principal; no investiga por su cuenta en Internet ni confirma disponibilidad de prácticas.
 
+La selección se centra en informática y software. Consulta la
+[lista de etiquetas y criterios de desarrollo](ETIQUETAS_DESARROLLO.md): se han
+eliminado las categorías genéricas de industria, comercios e inmobiliarias.
+
+## Publicar este proyecto en GitHub desde Windows
+
+Para el repositorio `Kilichi/ProspectorAI`, desde PowerShell en esta carpeta:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/publish-github.ps1
+```
+
+El script prepara el commit, marca los lanzadores macOS como ejecutables, comprueba
+que no se incluyen archivos privados ni las claves locales y hace push sin forzar.
+Si Git solicita autenticación, inicia sesión con tu cuenta en su ventana de GitHub.
+No escribas tokens ni API keys en el código. `.gitignore` excluye también el PDF
+local del enunciado; se publica la aplicación y su documentación.
+
 ## Arrancar todo con Docker
 
 ### macOS: un comando para arrancar todo

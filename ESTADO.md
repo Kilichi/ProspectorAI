@@ -17,7 +17,10 @@
 
 ## Verificaciones realizadas
 
-- 142 tests backend con Vitest/Supertest y mocks: sin APIs externas.
+- 143 tests backend con Vitest/Supertest y mocks: sin APIs externas. Orquestador de tests aislado del `.env` local.
+- Lanzadores macOS con sintaxis Bash comprobada y prueba con Docker simulado: rutas con espacios, arranque repetido, claves conservadas y parada sin borrar volúmenes. Arranque real en macOS pendiente.
+- Publicación preparada para `Kilichi/ProspectorAI` mediante `scripts/publish-github.ps1`. Esta sesión no puede escribir en `.git`; no se ha realizado commit ni push.
+- Perfil OSM reducido a informática/software y criterio IA de desarrollo reforzado; lista en `ETIQUETAS_DESARROLLO.md`. No se borraron ni reanalizaron empresas existentes.
 - 5 pruebas Playwright con Chrome y APIs simuladas: bienvenida/búsqueda/polling, filtros/mapa/edición, errores/vacío, móvil y edición de correo/contacto explícito.
 - ESLint y compilación Vite correctos. Formato comprobado con Prettier.
 - `npm run docker:check`: Compose válido; no imprime secretos.

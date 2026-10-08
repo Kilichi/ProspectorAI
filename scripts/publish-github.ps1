@@ -19,8 +19,11 @@ if (-not (Test-Path -LiteralPath '.git')) {
 # OpenSSL conserva la verificación TLS y evita el fallo de credenciales de Schannel.
 Invoke-Git -Arguments @('config', 'http.sslBackend', 'openssl')
 $repo = 'https://github.com/Kilichi/ProspectorAI.git'
-$remote = & git remote get-url origin 2>$null
-if ($LASTEXITCODE -eq 0) {
+$remotes = & git remote
+if ($LASTEXITCODE -ne 0) { throw 'No se han podido consultar los remotos.' }
+if ($remotes -contains 'origin') {
+    $remote = & git remote get-url origin
+    if ($LASTEXITCODE -ne 0) { throw 'No se ha podido consultar origin.' }
     if ($remote -ne $repo) { throw 'origin apunta a otro repositorio. Revísalo antes de publicar.' }
 } else {
     Invoke-Git -Arguments @('remote', 'add', 'origin', $repo)
